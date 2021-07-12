@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:videodetector/constant/Constant.dart';
+import 'package:videodetector/network/network_service.dart';
 import 'package:videodetector/ui/auth_screen/auth_screen.dart';
 import 'package:videodetector/ui/component/input_widget.dart';
 import 'package:videodetector/ui/record_video/record_video.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen();
+  final String mainUrl;
+
+  HomeScreen(this.mainUrl);
 
   @override
   State<StatefulWidget> createState() {
@@ -18,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? _videoPath = null;
+  XFile? _videoFile = null;
   double _headerHeight = 320.0;
   final String _assetPlayImagePath = 'assets/images/ic_play.png';
   final String _assetImagePath = 'assets/images/ic_no_video.png';
@@ -32,12 +37,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Stack(
-      children: <Widget>[
-        _videoPath != null ? _getVideoContainer() : _getImageFromAsset(),
-        _getCameraFab(),
-        _getLoginButton(),
-      ],
-    ));
+          children: <Widget>[
+            _videoPath != null ? _getVideoContainer() : _getImageFromAsset(),
+            _getCameraFab(),
+            _getLoginButton(),
+          ],
+        ));
   }
 
   Widget _getImageFromAsset() {
@@ -85,16 +90,16 @@ class _HomeScreenState extends State<HomeScreen> {
             children: <Widget>[
               _thumbPath != null
                   ? new Opacity(
-                      opacity: 0.5,
-                      child: new Image.file(
-                        File(
-                          _thumbPath,
-                        ),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: _headerHeight,
-                      ),
-                    )
+                opacity: 0.5,
+                child: new Image.file(
+                  File(
+                    _thumbPath,
+                  ),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: _headerHeight,
+                ),
+              )
                   : new Container(),
               new Align(
                 alignment: Alignment.center,
@@ -105,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () {
                         Navigator.of(context).push(new MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                new VideoPlayerScreen(_videoPath!)));
+                            new VideoPlayerScreen(_videoPath!)));
                       },
                       child: new Image.asset(
                         _assetPlayImagePath,
@@ -135,21 +140,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildPathWidget() {
     return _videoPath != null
         ? new Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              width: double.infinity,
-              height: 100.0,
-              padding: EdgeInsets.only(
-                  left: 10.0, right: 10.0, top: 5.0, bottom: 5.0),
-              color: Color.fromRGBO(00, 00, 00, 0.7),
-              child: Center(
-                child: Text(
-                  _videoPath!,
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          )
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        width: double.infinity,
+        height: 100.0,
+        padding: EdgeInsets.only(
+            left: 10.0, right: 10.0, top: 5.0, bottom: 5.0),
+        color: Color.fromRGBO(00, 00, 00, 0.7),
+        child: Center(
+          child: Text(
+            _videoPath!,
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ),
+    )
         : new Container();
   }
 
@@ -169,6 +174,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _getLoginButton() {
+    return LoginButtonWidget(videoPath: _videoPath, widget: widget, videoFile: _videoFile, context: context);
+  }
+
+  Future _recordVideo() async {
+    final  videoPath = await Navigator.of(context).pushNamed(CAMERA_SCREEN);
+    print('path vid $_videoPath');
+    setState(() {
+      _videoFile = videoPath as XFile;
+      _videoPath = _videoFile!.path;
+
+    });
+  }
+}
+
+class LoginButtonWidget extends StatefulWidget {
+  var loading = false;
+   LoginButtonWidget({
+    Key? key,
+    required String? videoPath,
+    required this.widget,
+    required XFile? videoFile,
+    required this.context,
+  }) : _videoPath = videoPath, _videoFile = videoFile, super(key: key);
+
+  final String? _videoPath;
+  final HomeScreen widget;
+  final XFile? _videoFile;
+  final BuildContext context;
+
+  @override
+  State<LoginButtonWidget> createState() => _LoginButtonWidgetState();
+}
+
+class _LoginButtonWidgetState extends State<LoginButtonWidget> {
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(top: 400.0),
       alignment: Alignment.center,
@@ -178,12 +219,24 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: GestureDetector(
-                    onTap: () {
-                      if (_videoPath != '' && _videoPath != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text("sending request"),
-                        ));
+                child: widget.loading == false?GestureDetector(
+                    onTap: () async{
+                      if (widget._videoPath != '' && widget._videoPath != null) {
+                        setState(() {
+                          widget.loading = true;
+                        });
+                        print("Video loading");
+                        // var response = await NetworkService().sendVideo(widget.mainUrl, _videoFile!);
+                        // var response = await NetworkService().sendVideoSinglePart(widget.mainUrl, _videoFile!);
+                        // var response = await NetworkService().fileUpload(widget.mainUrl, _videoFile!);
+                        var response = await NetworkService().sendVideoDio(widget.widget.mainUrl, widget._videoFile!);
+                        setState(() {
+                          widget.loading = false;
+                        });
+
+
+
+                        print("Video loading done");
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text("Please record video first"),
@@ -191,20 +244,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                     child:
-                        roundedRectButton("Check Now", signInGradients, false)),
+                    roundedRectButton("Check Now", signInGradients, false)):CircularProgressIndicator(),
               )
             ],
           ),
         ),
       ),
     );
-  }
-
-  Future _recordVideo() async {
-    final videoPath = await Navigator.of(context).pushNamed(CAMERA_SCREEN);
-    print('path vid $_videoPath');
-    setState(() {
-      _videoPath = videoPath.toString();
-    });
   }
 }

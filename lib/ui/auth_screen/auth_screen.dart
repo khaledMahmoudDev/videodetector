@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:videodetector/constant/Constant.dart';
+import 'package:videodetector/ui/login/login_screen.dart';
 
 class AuthScreen extends StatelessWidget {
+  TextEditingController _textFieldController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -20,10 +23,33 @@ class AuthScreen extends StatelessWidget {
               ),
               GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pushNamed(HOME_SCREEN);
+                    if(_textFieldController.text.isNotEmpty){
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) =>
+                              HomeScreen(_textFieldController.text)));
+                    }else{
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text("Please enter Server URL"),
+                      ));
+                    }
+
                   },
                   child: roundedRectButton(
                       "Let's get Started", signInGradients, false)),
+
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(_textFieldController.text),
+              ),
+              GestureDetector(
+                  onTap: () {
+                    _displayTextInputDialog(context);
+                  },
+                  child: Text('Add server Url',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)))
 
               // GestureDetector(
               //     onTap: () {
@@ -35,6 +61,30 @@ class AuthScreen extends StatelessWidget {
           ),
         )
       ],
+    );
+  }
+
+  Future<void> _displayTextInputDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Enter Server Url'),
+          content: TextField(
+            controller: _textFieldController,
+            decoration: InputDecoration(hintText: "https://www.helloworld.com"),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                print(_textFieldController.text);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

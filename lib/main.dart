@@ -36,7 +36,6 @@ Future<Null> main() async {
       ),
       home:  MyHomePage(title: 'hello',),
       routes: <String, WidgetBuilder>{
-        HOME_SCREEN: (BuildContext context) => HomeScreen(),//login
         CAMERA_SCREEN: (BuildContext context) => CameraHomeScreen(cameras!),//camera record
         SIGNUP_SCREEN: (BuildContext context) => SignUpScreen(),
       },

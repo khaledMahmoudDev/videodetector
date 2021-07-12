@@ -249,7 +249,7 @@ class _CameraHomeScreenState extends State<CameraHomeScreen> {
   }
   void setCameraResult() {
     print("Recording Done! ${videoFile!.path}");
-    Navigator.pop(context, videoFile!.path);
+    Navigator.pop(context, videoFile);
   }
 
   void logError(String code, String message) =>
