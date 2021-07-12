@@ -260,9 +260,6 @@ class _LoginButtonWidgetState extends State<LoginButtonWidget> {
                               widget.loading = true;
                             });
                             print("Video loading");
-                            // var response = await NetworkService().sendVideo(widget.mainUrl, _videoFile!);
-                            // var response = await NetworkService().sendVideoSinglePart(widget.mainUrl, _videoFile!);
-                            // var response = await NetworkService().fileUpload(widget.mainUrl, _videoFile!);
                             var response = await NetworkService().sendVideoDio(
                                 widget.widget.mainUrl, widget._videoPath!);
                             setState(() {
