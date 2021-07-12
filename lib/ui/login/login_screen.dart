@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:videodetector/constant/Constant.dart';
 import 'package:videodetector/network/network_service.dart';
 import 'package:videodetector/ui/auth_screen/auth_screen.dart';
@@ -23,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String? _videoPath = null;
   XFile? _videoFile = null;
+  final ImagePicker _picker = ImagePicker();
   double _headerHeight = 320.0;
   final String _assetPlayImagePath = 'assets/images/ic_play.png';
   final String _assetImagePath = 'assets/images/ic_no_video.png';
@@ -37,12 +39,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Stack(
-          children: <Widget>[
-            _videoPath != null ? _getVideoContainer() : _getImageFromAsset(),
-            _getCameraFab(),
-            _getLoginButton(),
-          ],
-        ));
+      children: <Widget>[
+        _videoPath != null ? _getVideoContainer() : _getImageFromAsset(),
+        _getCameraFab(),
+        _getLoginButton(),
+      ],
+    ));
   }
 
   Widget _getImageFromAsset() {
@@ -90,16 +92,16 @@ class _HomeScreenState extends State<HomeScreen> {
             children: <Widget>[
               _thumbPath != null
                   ? new Opacity(
-                opacity: 0.5,
-                child: new Image.file(
-                  File(
-                    _thumbPath,
-                  ),
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: _headerHeight,
-                ),
-              )
+                      opacity: 0.5,
+                      child: new Image.file(
+                        File(
+                          _thumbPath,
+                        ),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: _headerHeight,
+                      ),
+                    )
                   : new Container(),
               new Align(
                 alignment: Alignment.center,
@@ -110,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () {
                         Navigator.of(context).push(new MaterialPageRoute(
                             builder: (BuildContext context) =>
-                            new VideoPlayerScreen(_videoPath!)));
+                                new VideoPlayerScreen(_videoPath!)));
                       },
                       child: new Image.asset(
                         _assetPlayImagePath,
@@ -140,21 +142,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildPathWidget() {
     return _videoPath != null
         ? new Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        width: double.infinity,
-        height: 100.0,
-        padding: EdgeInsets.only(
-            left: 10.0, right: 10.0, top: 5.0, bottom: 5.0),
-        color: Color.fromRGBO(00, 00, 00, 0.7),
-        child: Center(
-          child: Text(
-            _videoPath!,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-    )
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              width: double.infinity,
+              height: 100.0,
+              padding: EdgeInsets.only(
+                  left: 10.0, right: 10.0, top: 5.0, bottom: 5.0),
+              color: Color.fromRGBO(00, 00, 00, 0.7),
+              child: Center(
+                child: Text(
+                  _videoPath!,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          )
         : new Container();
   }
 
@@ -162,41 +164,71 @@ class _HomeScreenState extends State<HomeScreen> {
     return Positioned(
       top: _headerHeight - 30.0,
       right: 16.0,
-      child: FloatingActionButton(
-        onPressed: _recordVideo,
-        child: Icon(
-          Icons.videocam,
-          color: Colors.white,
-        ),
-        backgroundColor: Colors.red,
+      child: Row(
+        children: [
+          FloatingActionButton(
+            onPressed: _recordVideo,
+            child: Icon(
+              Icons.videocam,
+              color: Colors.white,
+            ),
+            backgroundColor: Colors.red,
+          ),
+          SizedBox(
+            width: 8,
+          ),
+          FloatingActionButton(
+            onPressed: _pickVideo,
+            child: Icon(
+              Icons.video_call,
+              color: Colors.white,
+            ),
+            backgroundColor: Colors.blue,
+          ),
+        ],
       ),
     );
   }
 
   Widget _getLoginButton() {
-    return LoginButtonWidget(videoPath: _videoPath, widget: widget, videoFile: _videoFile, context: context);
+    return LoginButtonWidget(
+        videoPath: _videoPath,
+        widget: widget,
+        videoFile: _videoFile,
+        context: context);
   }
 
   Future _recordVideo() async {
-    final  videoPath = await Navigator.of(context).pushNamed(CAMERA_SCREEN);
+    final videoPath = await Navigator.of(context).pushNamed(CAMERA_SCREEN);
     print('path vid $_videoPath');
     setState(() {
       _videoFile = videoPath as XFile;
       _videoPath = _videoFile!.path;
+    });
+  }
 
+  Future _pickVideo() async {
+    PickedFile? videoFile = await _picker.getVideo(source: ImageSource.gallery);
+    // final videoPath = await Navigator.of(context).pushNamed(CAMERA_SCREEN);
+    print('path vid ${videoFile!.path}');
+    setState(() {
+      _videoPath = videoFile.path;
     });
   }
 }
 
 class LoginButtonWidget extends StatefulWidget {
   var loading = false;
-   LoginButtonWidget({
+
+  LoginButtonWidget({
     Key? key,
     required String? videoPath,
     required this.widget,
     required XFile? videoFile,
     required this.context,
-  }) : _videoPath = videoPath, _videoFile = videoFile, super(key: key);
+  })  : _videoPath = videoPath,
+        _videoFile = videoFile,
+        super(key: key);
 
   final String? _videoPath;
   final HomeScreen widget;
@@ -219,32 +251,51 @@ class _LoginButtonWidgetState extends State<LoginButtonWidget> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: widget.loading == false?GestureDetector(
-                    onTap: () async{
-                      if (widget._videoPath != '' && widget._videoPath != null) {
-                        setState(() {
-                          widget.loading = true;
-                        });
-                        print("Video loading");
-                        // var response = await NetworkService().sendVideo(widget.mainUrl, _videoFile!);
-                        // var response = await NetworkService().sendVideoSinglePart(widget.mainUrl, _videoFile!);
-                        // var response = await NetworkService().fileUpload(widget.mainUrl, _videoFile!);
-                        var response = await NetworkService().sendVideoDio(widget.widget.mainUrl, widget._videoFile!);
-                        setState(() {
-                          widget.loading = false;
-                        });
+                child: widget.loading == false
+                    ? GestureDetector(
+                        onTap: () async {
+                          if (widget._videoPath != '' &&
+                              widget._videoPath != null) {
+                            setState(() {
+                              widget.loading = true;
+                            });
+                            print("Video loading");
+                            // var response = await NetworkService().sendVideo(widget.mainUrl, _videoFile!);
+                            // var response = await NetworkService().sendVideoSinglePart(widget.mainUrl, _videoFile!);
+                            // var response = await NetworkService().fileUpload(widget.mainUrl, _videoFile!);
+                            var response = await NetworkService().sendVideoDio(
+                                widget.widget.mainUrl, widget._videoPath!);
+                            setState(() {
+                              widget.loading = false;
+                            });
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text('Result'),
+                                  content: Text(response),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text('OK'),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
 
-
-
-                        print("Video loading done");
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text("Please record video first"),
-                        ));
-                      }
-                    },
-                    child:
-                    roundedRectButton("Check Now", signInGradients, false)):CircularProgressIndicator(),
+                            print("Video loading done");
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text("Please record video first"),
+                            ));
+                          }
+                        },
+                        child: roundedRectButton(
+                            "Check Now", signInGradients, false))
+                    : CircularProgressIndicator(),
               )
             ],
           ),

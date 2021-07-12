@@ -153,9 +153,9 @@ class NetworkService {
       print("Video upload failed");
     }
   }
-  sendVideoDio(String kMainUrl, XFile video) async {
+  Future<String> sendVideoDio(String kMainUrl, String  video) async {
     print("Video uploadoading");
-    String fileName = video.path;
+    String fileName = video;
     print("File base name: $fileName");
 
     try {
@@ -167,11 +167,18 @@ class NetworkService {
       Response response =
       await Dio().post(kMainUrl, data: formData);
       print("File upload response: $response");
+      print(response.data['message']);
+      Map<String, dynamic> res = jsonDecode(response.data);
+      var predection = res['prediction'];
+      print('pesdectioooon $predection');
+
 
       // Show the incoming message in snakbar
-      print(response.data['message']);
+      return predection;
+
     } catch (e) {
       print("Exception Caught: $e");
+      return 'Error try again';
     }
   }
 }
