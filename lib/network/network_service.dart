@@ -6,13 +6,13 @@ import 'package:dio/dio.dart';
 class NetworkService {
   Future<String?> sendVideoDio(String kMainUrl, String  video) async {
     print("Video uploadoading");
-    String fileName = video;
-    print("File base name: $fileName");
+    String filePath = video;
+    print("File base name: $filePath");
 
     try {
       FormData formData = FormData.fromMap({
         "file":
-        await MultipartFile.fromFile(fileName, filename:fileName),
+        await MultipartFile.fromFile(filePath, filename:filePath),
       });
 
       Response response =
