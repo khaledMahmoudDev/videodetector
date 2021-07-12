@@ -32,9 +32,6 @@ dependencies:
   # the parent directory to use the current plugin's version.
   path_provider: ^2.0.0
   video_player: ^2.1.4
-  #network
-  http: ^0.13.3
-  video_compress: ^2.1.0
   dio: ^4.0.0
   image_picker: ^0.8.1+3
 

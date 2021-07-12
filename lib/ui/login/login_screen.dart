@@ -270,7 +270,7 @@ class _LoginButtonWidgetState extends State<LoginButtonWidget> {
                               builder: (context) {
                                 return AlertDialog(
                                   title: Text('Result'),
-                                  content: Text(response),
+                                  content: Text(response!),
                                   actions: <Widget>[
                                     FlatButton(
                                       child: Text('OK'),

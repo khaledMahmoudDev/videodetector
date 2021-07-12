@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 
 
 class NetworkService {
-  Future<String> sendVideoDio(String kMainUrl, String  video) async {
+  Future<String?> sendVideoDio(String kMainUrl, String  video) async {
     print("Video uploadoading");
     String fileName = video;
     print("File base name: $fileName");
@@ -18,13 +18,10 @@ class NetworkService {
       Response response =
       await Dio().post(kMainUrl, data: formData);
       print("File upload response: $response");
-      print(response.data['message']);
-      Map<String, dynamic> res = jsonDecode(response.data);
-      var predection = res['prediction'];
-      print('pesdectioooon $predection');
+      print(response.data['prediction']);
 
 
-      return predection;
+      return '${response.data['prediction']}';
 
     } catch (e) {
       print("Exception Caught: $e");
