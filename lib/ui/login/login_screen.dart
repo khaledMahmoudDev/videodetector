@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: <Widget>[
         _videoPath != null ? _getVideoContainer() : _getImageFromAsset(),
         _getCameraFab(),
-        _getLogo(),
+        _getLoginButton(),
       ],
     ));
   }
@@ -168,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _getLogo() {
+  Widget _getLoginButton() {
     return Container(
       margin: EdgeInsets.only(top: 400.0),
       alignment: Alignment.center,
@@ -180,10 +180,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pushNamed(HOME_SCREEN);
+                      if (_videoPath != '' && _videoPath != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text("sending request"),
+                        ));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text("Please record video first"),
+                        ));
+                      }
                     },
-                    child: roundedRectButton(
-                        "Log in", signInGradients, false)),
+                    child:
+                        roundedRectButton("Check Now", signInGradients, false)),
               )
             ],
           ),

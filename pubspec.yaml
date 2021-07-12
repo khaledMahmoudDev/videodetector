@@ -32,6 +32,8 @@ dependencies:
   # the parent directory to use the current plugin's version.
   path_provider: ^2.0.0
   video_player: ^2.1.4
+  #network
+  http: ^0.13.3
 
 
   # The following adds the Cupertino Icons font to your application.

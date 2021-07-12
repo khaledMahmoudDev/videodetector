@@ -24,12 +24,13 @@ class AuthScreen extends StatelessWidget {
                   },
                   child: roundedRectButton(
                       "Let's get Started", signInGradients, false)),
-              GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pushNamed(SIGNUP_SCREEN);
-                  },
-                  child: roundedRectButton(
-                      "Create an Account", signUpGradients, false)),
+
+              // GestureDetector(
+              //     onTap: () {
+              //       Navigator.of(context).pushNamed(SIGNUP_SCREEN);
+              //     },
+              //     child: roundedRectButton(
+              //         "Create an Account", signUpGradients, false)),
             ],
           ),
         )
