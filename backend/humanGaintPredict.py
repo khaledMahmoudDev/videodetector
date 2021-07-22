@@ -97,8 +97,9 @@ def get_label(total_preds):
         if i == 1:
             count += 1
 
-    print(count)
-    if count >= (len(total_preds) / 2):
+    print(f"the number of abnormal images is {count} from total of {len(total_preds)}")
+    abnormality_thrshold = int(len(total_preds) * 0.1)
+    if count >= abnormality_thrshold:
         return 'Abnormal'
     else:
         return 'Noraml'
